@@ -17,6 +17,7 @@
 #define AGG_PATH_STORAGE_INCLUDED
 
 #include <cstring>
+#include <cmath>
 #include "agg_math.h"
 #include "agg_array.h"
 #include "agg_bezier_arc.h"
@@ -147,7 +148,7 @@ namespace agg
             unsigned cmd = v.vertex(i, &x, &y);
             add_vertex(x, y, cmd);
         }
-	    return *this;
+        return *this;
     }
 
     //------------------------------------------------------------------------
@@ -307,11 +308,11 @@ namespace agg
 
             if(m_coord_blocks)
             {
-                std::memcpy(new_coords, 
+                memcpy(new_coords, 
                        m_coord_blocks, 
                        m_max_blocks * sizeof(T*));
 
-                std::memcpy(new_cmds, 
+                memcpy(new_cmds, 
                        m_cmd_blocks, 
                        m_max_blocks * sizeof(unsigned char*));
 
@@ -489,14 +490,14 @@ namespace agg
             m_stop(false)
         {}
 
-        poly_container_reverse_adaptor(Container& data, bool closed) :
+        poly_container_reverse_adaptor(const Container& data, bool closed) :
             m_container(&data), 
             m_index(-1),
             m_closed(closed),
             m_stop(false)
         {}
 
-        void init(Container& data, bool closed)
+        void init(const Container& data, bool closed)
         {
             m_container = &data;
             m_index = m_container->size() - 1;
@@ -530,7 +531,7 @@ namespace agg
         }
 
     private:
-        Container* m_container;
+        const Container* m_container;
         int  m_index;
         bool m_closed;
         bool m_stop;
@@ -719,7 +720,8 @@ namespace agg
         template<class VertexSource> 
         void concat_path(VertexSource& vs, unsigned path_id = 0)
         {
-            double x, y;
+            double x=0;
+            double y=0;
             unsigned cmd;
             vs.rewind(path_id);
             while(!is_stop(cmd = vs.vertex(&x, &y)))
@@ -734,7 +736,7 @@ namespace agg
         template<class VertexSource> 
         void join_path(VertexSource& vs, unsigned path_id = 0)
         {
-            double x, y;
+            double x=0.0, y=0.0;
             unsigned cmd;
             vs.rewind(path_id);
             cmd = vs.vertex(&x, &y);
@@ -834,43 +836,6 @@ namespace agg
         }
 
 
-        //--------------------------------------------------------------------
-        // If the end points of a path are very, very close then make them
-        // exactly equal so that the stroke converter is not confused.
-        //--------------------------------------------------------------------
-        unsigned align_path(unsigned idx = 0)
-        {
-            if (idx >= total_vertices() || !is_move_to(command(idx))) 
-            {
-                return total_vertices();
-            }
-
-            double start_x, start_y;
-            for (; idx < total_vertices() && is_move_to(command(idx)); ++idx)
-            {
-                vertex(idx, &start_x, &start_y);
-            }
-            while (idx < total_vertices() && is_drawing(command(idx)))
-                ++idx;
-
-            double x, y;
-            if (is_drawing(vertex(idx - 1, &x, &y)) &&
-                is_equal_eps(x, start_x, 1e-8) &&
-                is_equal_eps(y, start_y, 1e-8))
-            {
-                modify_vertex(idx - 1, start_x, start_y);
-            }
-
-            while (idx < total_vertices() && !is_move_to(command(idx)))
-                ++idx;
-            return idx;
-        }
-
-        void align_all_paths()
-        {
-            for (unsigned i = 0; i < total_vertices(); i = align_path(i));
-        }
-
 
     private:
         unsigned perceive_polygon_orientation(unsigned start, unsigned end);
@@ -901,6 +866,12 @@ namespace agg
             double x2;
             double y2;
             if(is_vertex(m_vertices.last_vertex(&x2, &y2)))
+            {
+                *x += x2;
+                *y += y2;
+            }
+            else if (!is_stop(m_vertices.last_command()) && 
+                     is_vertex(m_vertices.prev_vertex(&x2, &y2)))
             {
                 *x += x2;
                 *y += y2;
@@ -1453,6 +1424,10 @@ namespace agg
         }
     }
 
+////////////////////////////////////////////////////////////////////////////////
+
+
+
     //-----------------------------------------------------vertex_stl_storage
     template<class Container> class vertex_stl_storage
     {
@@ -1569,13 +1544,12 @@ namespace agg
 
 // Example of declarations path_storage with std::vector as a container
 //---------------------------------------------------------------------------
-//#include <vector>
-//namespace agg
-//{
-//    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > stl_path_storage; 
-//}
 
-
+//#include <vector> 
+//namespace agg 
+//{ 
+//    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > path_storage;  
+//} 
 
 
 #endif

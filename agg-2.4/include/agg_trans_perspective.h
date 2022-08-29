@@ -19,7 +19,6 @@
 #ifndef AGG_TRANS_PERSPECTIVE_INCLUDED
 #define AGG_TRANS_PERSPECTIVE_INCLUDED
 
-#include <cmath>
 #include "agg_trans_affine.h"
 
 namespace agg
@@ -149,22 +148,22 @@ namespace agg
 
         // Multiply the matrix by another one and return
         // the result in a separete matrix.
-        trans_perspective operator * (const trans_perspective& m) const
+        trans_perspective operator * (const trans_perspective& m)
         {
             return trans_perspective(*this).multiply(m);
         }
-        trans_perspective operator * (const trans_affine& m) const
+        trans_perspective operator * (const trans_affine& m)
         {
             return trans_perspective(*this).multiply(m);
         }
 
         // Multiply the matrix by inverse of another one 
         // and return the result in a separete matrix.
-        trans_perspective operator / (const trans_perspective& m) const
+        trans_perspective operator / (const trans_perspective& m)
         {
             return trans_perspective(*this).multiply_inv(m);
         }
-        trans_perspective operator / (const trans_affine& m) const
+        trans_perspective operator / (const trans_affine& m)
         {
             return trans_perspective(*this).multiply_inv(m);
         }
@@ -681,7 +680,7 @@ namespace agg
     {
         double x = 0.707106781 * sx  + 0.707106781 * shx;
         double y = 0.707106781 * shy + 0.707106781 * sy;
-        return std::sqrt(x*x + y*y);
+        return sqrt(x*x + y*y);
     }
 
     //------------------------------------------------------------------------
@@ -721,8 +720,8 @@ namespace agg
     //------------------------------------------------------------------------
     void trans_perspective::scaling_abs(double* x, double* y) const
     {
-        *x = std::sqrt(sx  * sx  + shx * shx);
-        *y = std::sqrt(shy * shy + sy  * sy);
+        *x = sqrt(sx  * sx  + shx * shx);
+        *y = sqrt(shy * shy + sy  * sy);
     }
 
 

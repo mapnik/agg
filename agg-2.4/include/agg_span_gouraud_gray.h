@@ -24,8 +24,6 @@
 #ifndef AGG_SPAN_GOURAUD_GRAY_INCLUDED
 #define AGG_SPAN_GOURAUD_GRAY_INCLUDED
 
-#include <cmath>
-#include <cstdlib>
 #include "agg_basics.h"
 #include "agg_color_gray.h"
 #include "agg_dda_line.h"

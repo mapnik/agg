@@ -29,7 +29,6 @@
 #ifndef AGG_RASTERIZER_COMPOUND_AA_INCLUDED
 #define AGG_RASTERIZER_COMPOUND_AA_INCLUDED
 
-#include <limits>
 #include "agg_rasterizer_cells_aa.h"
 #include "agg_rasterizer_sl_clip.h"
 
@@ -50,8 +49,8 @@ namespace agg
 
         void initial()
         {
-            x     = std::numeric_limits<int>::max();
-            y     = std::numeric_limits<int>::max();
+            x     = 0x7FFFFFFF;
+            y     = 0x7FFFFFFF;
             cover = 0;
             area  = 0;
             left  = -1;
@@ -66,8 +65,7 @@ namespace agg
 
         int not_equal(int ex, int ey, const cell_style_aa& c) const
         {
-            return ((unsigned)ex - (unsigned)x) | ((unsigned)ey - (unsigned)y) | 
-                   ((unsigned)left - (unsigned)c.left) | ((unsigned)right - (unsigned)c.right);
+            return (ex - x) | (ey - y) | (left - c.left) | (right - c.right);
         }
     };
 
@@ -121,11 +119,12 @@ namespace agg
             m_asm(),     // Active Style Mask 
             m_cells(),
             m_cover_buf(),
-            m_min_style(std::numeric_limits<int>::max()),
-            m_max_style(std::numeric_limits<int>::min()),
+            m_master_alpha(),
+            m_min_style(0x7FFFFFFF),
+            m_max_style(-0x7FFFFFFF),
             m_start_x(0),
             m_start_y(0),
-            m_scan_y(std::numeric_limits<int>::max()),
+            m_scan_y(0x7FFFFFFF),
             m_sl_start(0),
             m_sl_len(0)
         {}
@@ -136,6 +135,7 @@ namespace agg
         void clip_box(double x1, double y1, double x2, double y2);
         void filling_rule(filling_rule_e filling_rule);
         void layer_order(layer_order_e order);
+        void master_alpha(int style, double alpha);
 
         //--------------------------------------------------------------------
         void styles(int left, int right);
@@ -188,7 +188,7 @@ namespace agg
         bool hit_test(int tx, int ty);
 
         //--------------------------------------------------------------------
-        AGG_INLINE unsigned calculate_alpha(int area) const
+        AGG_INLINE unsigned calculate_alpha(int area, unsigned master_alpha) const
         {
             int cover = area >> (poly_subpixel_shift*2 + 1 - aa_shift);
             if(cover < 0) cover = -cover;
@@ -201,7 +201,7 @@ namespace agg
                 }
             }
             if(cover > aa_mask) cover = aa_mask;
-            return cover;
+            return (cover * master_alpha + aa_mask) >> aa_shift;
         }
 
         //--------------------------------------------------------------------
@@ -214,6 +214,8 @@ namespace agg
 
             sl.reset_spans();
 
+            unsigned master_alpha = aa_mask;
+
             if(style_idx < 0) 
             {
                 style_idx = 0;
@@ -221,6 +223,7 @@ namespace agg
             else 
             {
                 style_idx++;
+                master_alpha = m_master_alpha[m_ast[style_idx] + m_min_style - 1];
             }
 
             const style_info& st = m_styles[m_ast[style_idx]];
@@ -241,14 +244,16 @@ namespace agg
 
                 if(area)
                 {
-                    alpha = calculate_alpha((cover << (poly_subpixel_shift + 1)) - area);
+                    alpha = calculate_alpha((cover << (poly_subpixel_shift + 1)) - area,
+                                            master_alpha);
                     sl.add_cell(x, alpha);
                     x++;
                 }
 
                 if(num_cells && cell->x > x)
                 {
-                    alpha = calculate_alpha(cover << (poly_subpixel_shift + 1));
+                    alpha = calculate_alpha(cover << (poly_subpixel_shift + 1),
+                                            master_alpha);
                     if(alpha)
                     {
                         sl.add_span(x, cell->x - x, alpha);
@@ -263,6 +268,7 @@ namespace agg
 
     private:
         void add_style(int style_id);
+        void allocate_master_alpha();
 
         //--------------------------------------------------------------------
         // Disable copying
@@ -280,6 +286,7 @@ namespace agg
         pod_vector<int8u>      m_asm;     // Active Style Mask 
         pod_vector<cell_info>  m_cells;
         pod_vector<cover_type> m_cover_buf;
+        pod_bvector<unsigned>  m_master_alpha;
 
         int        m_min_style;
         int        m_max_style;
@@ -304,9 +311,9 @@ namespace agg
     void rasterizer_compound_aa<Clip>::reset() 
     { 
         m_outline.reset(); 
-        m_min_style = std::numeric_limits<int>::max();
-        m_max_style = std::numeric_limits<int>::min();
-        m_scan_y    = std::numeric_limits<int>::max();
+        m_min_style =  0x7FFFFFFF;
+        m_max_style = -0x7FFFFFFF;
+        m_scan_y    =  0x7FFFFFFF;
         m_sl_start  =  0;
         m_sl_len    = 0;
     }
@@ -459,6 +466,7 @@ namespace agg
         }
         m_scan_y = m_outline.min_y();
         m_styles.allocate(m_max_style - m_min_style + 2, 128);
+        allocate_master_alpha();
         return true;
     }
 
@@ -479,7 +487,7 @@ namespace agg
             m_asm[nbyte] |= mask;
             style->start_cell = 0;
             style->num_cells = 0;
-            style->last_x = std::numeric_limits<int>::min();
+            style->last_x = -0x7FFFFFFF;
         }
         ++style->start_cell;
     }
@@ -514,7 +522,7 @@ namespace agg
                 style = &m_styles[0];
                 style->start_cell = 0;
                 style->num_cells = 0;
-                style->last_x = std::numeric_limits<int>::min();
+                style->last_x = -0x7FFFFFFF;
 
                 m_sl_start = cells[0]->x;
                 m_sl_len   = cells[num_cells-1]->x - m_sl_start + 1;
@@ -626,6 +634,7 @@ namespace agg
         }
         m_scan_y = y;
         m_styles.allocate(m_max_style - m_min_style + 2, 128);
+        allocate_master_alpha();
         return true;
     }
     
@@ -655,6 +664,30 @@ namespace agg
     {
         m_cover_buf.allocate(len, 256);
         return &m_cover_buf[0];
+    }
+
+    //------------------------------------------------------------------------ 
+    template<class Clip> 
+    void rasterizer_compound_aa<Clip>::allocate_master_alpha()
+    {
+        while((int)m_master_alpha.size() <= m_max_style)
+        {
+            m_master_alpha.add(aa_mask);
+        }
+    }
+
+    //------------------------------------------------------------------------ 
+    template<class Clip> 
+    void rasterizer_compound_aa<Clip>::master_alpha(int style, double alpha)
+    {
+        if(style >= 0)
+        {
+            while((int)m_master_alpha.size() <= style)
+            {
+                m_master_alpha.add(aa_mask);
+            }
+            m_master_alpha[style] = uround(alpha * aa_mask);
+        }
     }
 
 }

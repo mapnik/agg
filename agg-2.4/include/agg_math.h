@@ -27,7 +27,7 @@ namespace agg
 
     //------------------------------------------------------vertex_dist_epsilon
     // Coinciding points maximal distance (Epsilon)
-    const double vertex_dist_epsilon = 1e-14;
+    const double vertex_dist_epsilon = 1e-5;
 
     //-----------------------------------------------------intersection_epsilon
     // See calc_intersection
@@ -58,7 +58,7 @@ namespace agg
     {
         double dx = x2-x1;
         double dy = y2-y1;
-        return std::sqrt(dx * dx + dy * dy);
+        return sqrt(dx * dx + dy * dy);
     }
 
     //--------------------------------------------------------calc_sq_distance
@@ -76,7 +76,7 @@ namespace agg
     {
         double dx = x2-x1;
         double dy = y2-y1;
-        double d = std::sqrt(dx * dx + dy * dy);
+        double d = sqrt(dx * dx + dy * dy);
         if(d < vertex_dist_epsilon)
         {
             return calc_distance(x1, y1, x, y);
@@ -94,7 +94,7 @@ namespace agg
 
         if(dx == 0 && dy == 0)
         {
-	        return 0;
+            return 0;
         }
 
         double pdx = x - x1;
@@ -111,12 +111,12 @@ namespace agg
     {
         if(u <= 0)
         {
-	        return calc_sq_distance(x, y, x1, y1);
+            return calc_sq_distance(x, y, x1, y1);
         }
         else 
         if(u >= 1)
         {
-	        return calc_sq_distance(x, y, x2, y2);
+            return calc_sq_distance(x, y, x2, y2);
         }
         return calc_sq_distance(x, y, x1 + u * (x2 - x1), y1 + u * (y2 - y1));
     }
@@ -165,7 +165,7 @@ namespace agg
         // in terms of boundary conditions.
         //--------------------
         //double den  = (x2-x1) * (y4-y3) - (y2-y1) * (x4-x3);
-        //if(fabs(den) < intersection_epsilon) return false;
+        //if(std::fabs(den) < intersection_epsilon) return false;
         //double nom1 = (x4-x3) * (y1-y3) - (y4-y3) * (x1-x3);
         //double nom2 = (x2-x1) * (y1-y3) - (y2-y1) * (x1-x3);
         //double ua = nom1 / den;
@@ -181,7 +181,7 @@ namespace agg
     {
         double dx = x2 - x1;
         double dy = y2 - y1;
-        double d = std::sqrt(dx*dx + dy*dy); 
+        double d = sqrt(dx*dx + dy*dy); 
         *x =  thickness * dy / d;
         *y = -thickness * dx / d;
     }
@@ -377,7 +377,7 @@ namespace agg
         }
         double b1 = 0; // b1 is the value from the previous iteration
         // Set up a starting order for recurrence
-        int m1 = (int)std::fabs(x) + 6;
+        int m1 = (int)fabs(x) + 6;
         if(std::fabs(x) > 5) 
         {
             m1 = (int)(std::fabs(1.4 * x + 60 / x));

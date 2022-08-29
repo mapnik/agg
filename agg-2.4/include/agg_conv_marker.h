@@ -19,7 +19,6 @@
 #ifndef AGG_CONV_MARKER_INCLUDED
 #define AGG_CONV_MARKER_INCLUDED
 
-#include <cmath>
 #include "agg_basics.h"
 #include "agg_trans_affine.h"
 

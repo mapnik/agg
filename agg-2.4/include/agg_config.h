@@ -32,12 +32,13 @@
 //
 // Provides faster access for massive pixel operations, 
 // such as blur, image filtering:
-// #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
+
+#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 // 
 // Provides cheaper creation and destruction (no mem allocs):
 // #define AGG_RENDERING_BUFFER row_accessor<int8u>
 //
-// You can still use both of them simultaneously in your applications 
+// You can still use both of them simultaneouslyin your applications 
 // This #define is used only for default rendering_buffer type,
 // in short hand typedefs like pixfmt_rgba32.
 

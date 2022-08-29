@@ -60,15 +60,15 @@ namespace agg
         //--------------------------------------------------------------------
         void signature(const char* font_signature)
         {
-            m_font_signature = (char*)m_allocator.allocate(std::strlen(font_signature) + 1);
-            std::strcpy(m_font_signature, font_signature);
-            std::memset(m_glyphs, 0, sizeof(m_glyphs));
+            m_font_signature = (char*)m_allocator.allocate(strlen(font_signature) + 1);
+            strcpy(m_font_signature, font_signature);
+            memset(m_glyphs, 0, sizeof(m_glyphs));
         }
 
         //--------------------------------------------------------------------
         bool font_is(const char* font_signature) const
         {
-            return std::strcmp(font_signature, m_font_signature) == 0;
+            return strcmp(font_signature, m_font_signature) == 0;
         }
 
         //--------------------------------------------------------------------
@@ -97,7 +97,7 @@ namespace agg
                 m_glyphs[msb] = 
                     (glyph_cache**)m_allocator.allocate(sizeof(glyph_cache*) * 256, 
                                                         sizeof(glyph_cache*));
-                std::memset(m_glyphs[msb], 0, sizeof(glyph_cache*) * 256);
+                memset(m_glyphs[msb], 0, sizeof(glyph_cache*) * 256);
             }
 
             unsigned lsb = glyph_code & 0xFF;
@@ -172,7 +172,7 @@ namespace agg
                 if(m_num_fonts >= m_max_fonts)
                 {
                     obj_allocator<font_cache>::deallocate(m_fonts[0]);
-                    std::memcpy(m_fonts, 
+                    memcpy(m_fonts, 
                            m_fonts + 1, 
                            (m_max_fonts - 1) * sizeof(font_cache*));
                     m_num_fonts = m_max_fonts - 1;

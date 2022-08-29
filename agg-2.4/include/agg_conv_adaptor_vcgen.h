@@ -29,6 +29,7 @@ namespace agg
 
         void rewind(unsigned) {}
         unsigned vertex(double*, double*) { return path_cmd_stop; }
+        unsigned type() const { return 0; }
     };
 
 
@@ -49,6 +50,9 @@ namespace agg
             m_source(&source), 
             m_status(initial)
         {}
+
+        conv_adaptor_vcgen(conv_adaptor_vcgen<VertexSource, Generator, Markers> &&) = default;
+
         void attach(VertexSource& source) { m_source = &source; }
 
         Generator& generator() { return m_generator; }
@@ -64,6 +68,7 @@ namespace agg
         }
 
         unsigned vertex(double* x, double* y);
+        unsigned type() const { return m_source->type(); }
 
     private:
         // Prohibit copying
