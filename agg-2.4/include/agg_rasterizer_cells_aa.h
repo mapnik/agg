@@ -49,8 +49,7 @@ namespace agg
             cell_block_shift = 12,
             cell_block_size  = 1 << cell_block_shift,
             cell_block_mask  = cell_block_size - 1,
-            cell_block_pool  = 256,
-            cell_block_limit = 1024
+            cell_block_pool  = 256
         };
 
         struct sorted_y
@@ -64,7 +63,7 @@ namespace agg
         typedef rasterizer_cells_aa<Cell> self_type;
 
         ~rasterizer_cells_aa();
-        rasterizer_cells_aa();
+        rasterizer_cells_aa(unsigned cell_block_limit=1024);
 
         void reset();
         void style(const cell_type& style_cell);
@@ -108,6 +107,7 @@ namespace agg
         unsigned                m_max_blocks;
         unsigned                m_curr_block;
         unsigned                m_num_cells;
+	unsigned                m_cell_block_limit;
         cell_type**             m_cells;
         cell_type*              m_curr_cell_ptr;
         pod_vector<cell_type*>  m_sorted_cells;
@@ -131,11 +131,10 @@ namespace agg
         if(m_num_blocks)
         {
             cell_type** ptr = m_cells + m_num_blocks - 1;
-            while(m_num_blocks > 0)
+            while(m_num_blocks--)
             {
                 pod_allocator<cell_type>::deallocate(*ptr, cell_block_size);
                 ptr--;
-                --m_num_blocks;
             }
             pod_allocator<cell_type*>::deallocate(m_cells, m_max_blocks);
         }
@@ -143,19 +142,20 @@ namespace agg
 
     //------------------------------------------------------------------------
     template<class Cell> 
-    rasterizer_cells_aa<Cell>::rasterizer_cells_aa() :
+    rasterizer_cells_aa<Cell>::rasterizer_cells_aa(unsigned cell_block_limit) :
         m_num_blocks(0),
         m_max_blocks(0),
         m_curr_block(0),
         m_num_cells(0),
+	m_cell_block_limit(cell_block_limit),
         m_cells(0),
         m_curr_cell_ptr(0),
         m_sorted_cells(),
         m_sorted_y(),
-        m_min_x(0x7FFFFFFF),
-        m_min_y(0x7FFFFFFF),
-        m_max_x(-0x7FFFFFFF),
-        m_max_y(-0x7FFFFFFF),
+        m_min_x(std::numeric_limits<int>::max()),
+        m_min_y(std::numeric_limits<int>::max()),
+        m_max_x(std::numeric_limits<int>::min()),
+        m_max_y(std::numeric_limits<int>::min()),
         m_sorted(false)
     {
         m_style_cell.initial();
@@ -171,10 +171,10 @@ namespace agg
         m_curr_cell.initial();
         m_style_cell.initial();
         m_sorted = false;
-        m_min_x =  0x7FFFFFFF;
-        m_min_y =  0x7FFFFFFF;
-        m_max_x = -0x7FFFFFFF;
-        m_max_y = -0x7FFFFFFF;
+        m_min_x = std::numeric_limits<int>::max();
+        m_min_y = std::numeric_limits<int>::max();
+        m_max_x = std::numeric_limits<int>::min();
+        m_max_y = std::numeric_limits<int>::min();
     }
 
     //------------------------------------------------------------------------
@@ -185,7 +185,7 @@ namespace agg
         {
             if((m_num_cells & cell_block_mask) == 0)
             {
-                if(m_num_blocks >= cell_block_limit) return;
+                if(m_num_blocks >= m_cell_block_limit) return;
                 allocate_block();
             }
             *m_curr_cell_ptr++ = m_curr_cell;
@@ -219,7 +219,8 @@ namespace agg
         int fx1 = x1 & poly_subpixel_mask;
         int fx2 = x2 & poly_subpixel_mask;
 
-        int delta, p, first, dx;
+        int delta, p, first;
+        long long dx;
         int incr, lift, mod, rem;
 
         //trivial case. Happens often
@@ -244,7 +245,7 @@ namespace agg
         first = poly_subpixel_scale;
         incr  = 1;
 
-        dx = x2 - x1;
+        dx = (long long)x2 - (long long)x1;
 
         if(dx < 0)
         {
@@ -254,8 +255,8 @@ namespace agg
             dx    = -dx;
         }
 
-        delta = p / dx;
-        mod   = p % dx;
+        delta = (int)(p / dx);
+        mod   = (int)(p % dx);
 
         if(mod < 0)
         {
@@ -273,8 +274,8 @@ namespace agg
         if(ex1 != ex2)
         {
             p     = poly_subpixel_scale * (y2 - y1 + delta);
-            lift  = p / dx;
-            rem   = p % dx;
+            lift  = (int)(p / dx);
+            rem   = (int)(p % dx);
 
             if (rem < 0)
             {
@@ -319,23 +320,17 @@ namespace agg
     {
         enum dx_limit_e { dx_limit = 16384 << poly_subpixel_shift };
 
-        int dx = x2 - x1;
+        long long dx = (long long)x2 - (long long)x1;
 
         if(dx >= dx_limit || dx <= -dx_limit)
         {
-            int cx = (x1 + x2) >> 1;
-            int cy = (y1 + y2) >> 1;
-
-            // Bail if values are so large they are likely to wrap
-            if ((std::abs(x1) >= std::numeric_limits<int>::max()/2) || (std::abs(y1) >= std::numeric_limits<int>::max()/2) ||
-                (std::abs(x2) >= std::numeric_limits<int>::max()/2) || (std::abs(y2) >= std::numeric_limits<int>::max()/2))
-                    return;
-
+            int cx = (int)(((long long)x1 + (long long)x2) >> 1);
+            int cy = (int)(((long long)y1 + (long long)y2) >> 1);
             line(x1, y1, cx, cy);
             line(cx, cy, x2, y2);
         }
 
-        int dy = y2 - y1;
+        long long dy = (long long)y2 - (long long)y1;
         int ex1 = x1 >> poly_subpixel_shift;
         int ex2 = x2 >> poly_subpixel_shift;
         int ey1 = y1 >> poly_subpixel_shift;
@@ -344,7 +339,8 @@ namespace agg
         int fy2 = y2 & poly_subpixel_mask;
 
         int x_from, x_to;
-        int p, rem, mod, lift, delta, first, incr;
+        int rem, mod, lift, delta, first, incr;
+        long long p;
 
         if(ex1 < m_min_x) m_min_x = ex1;
         if(ex1 > m_max_x) m_max_x = ex1;
@@ -421,8 +417,8 @@ namespace agg
             dy    = -dy;
         }
 
-        delta = p / dy;
-        mod   = p % dy;
+        delta = (int)(p / dy);
+        mod   = (int)(p % dy);
 
         if(mod < 0)
         {
@@ -439,8 +435,8 @@ namespace agg
         if(ey1 != ey2)
         {
             p     = poly_subpixel_scale * dx;
-            lift  = p / dy;
-            rem   = p % dy;
+            lift  = (int)(p / dy);
+            rem   = (int)(p % dy);
 
             if(rem < 0)
             {
@@ -484,7 +480,7 @@ namespace agg
 
                 if(m_cells)
                 {
-                    memcpy(new_cells, m_cells, m_max_blocks * sizeof(cell_type*));
+                    std::memcpy(new_cells, m_cells, m_max_blocks * sizeof(cell_type*));
                     pod_allocator<cell_type*>::deallocate(m_cells, m_max_blocks);
                 }
                 m_cells = new_cells;
@@ -633,8 +629,8 @@ namespace agg
         if(m_sorted) return; //Perform sort only the first time.
 
         add_curr_cell();
-        m_curr_cell.x     = 0x7FFFFFFF;
-        m_curr_cell.y     = 0x7FFFFFFF;
+        m_curr_cell.x     = std::numeric_limits<int>::max();
+        m_curr_cell.y     = std::numeric_limits<int>::max();
         m_curr_cell.cover = 0;
         m_curr_cell.area  = 0;
 
@@ -662,28 +658,18 @@ namespace agg
         // Create the Y-histogram (count the numbers of cells for each Y)
         cell_type** block_ptr = m_cells;
         cell_type*  cell_ptr;
-        unsigned nb = m_num_cells >> cell_block_shift;
+        unsigned nb = m_num_cells;
         unsigned i;
-        while(nb > 0)
+        while(nb)
         {
             cell_ptr = *block_ptr++;
-            i = cell_block_size;
-            while(i > 0)
+            i = (nb > cell_block_size) ? unsigned(cell_block_size) : nb;
+            nb -= i;
+            while(i--) 
             {
                 m_sorted_y[cell_ptr->y - m_min_y].start++;
                 ++cell_ptr;
-                --i;
             }
-            --nb;
-        }
-
-        cell_ptr = *block_ptr++;
-        i = m_num_cells & cell_block_mask;
-        while(i > 0)
-        {
-            m_sorted_y[cell_ptr->y - m_min_y].start++;
-            ++cell_ptr;
-            --i;
         }
 
         // Convert the Y-histogram into the array of starting indexes
@@ -697,33 +683,21 @@ namespace agg
 
         // Fill the cell pointer array sorted by Y
         block_ptr = m_cells;
-        nb = m_num_cells >> cell_block_shift;
-        while(nb > 0)
+        nb = m_num_cells;
+        while(nb)
         {
             cell_ptr = *block_ptr++;
-            i = cell_block_size;
-            while(i > 0)
+            i = (nb > cell_block_size) ? unsigned(cell_block_size) : nb;
+            nb -= i;
+            while(i--)
             {
                 sorted_y& curr_y = m_sorted_y[cell_ptr->y - m_min_y];
                 m_sorted_cells[curr_y.start + curr_y.num] = cell_ptr;
                 ++curr_y.num;
                 ++cell_ptr;
-                --i;
             }
-            --nb;
         }
         
-        cell_ptr = *block_ptr++;
-        i = m_num_cells & cell_block_mask;
-        while(i > 0)
-        {
-            sorted_y& curr_y = m_sorted_y[cell_ptr->y - m_min_y];
-            m_sorted_cells[curr_y.start + curr_y.num] = cell_ptr;
-            ++curr_y.num;
-            ++cell_ptr;
-            --i;
-        }
-
         // Finally arrange the X-arrays
         for(i = 0; i < m_sorted_y.size(); i++)
         {

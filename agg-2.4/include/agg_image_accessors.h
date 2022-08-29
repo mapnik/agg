@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -32,14 +32,14 @@ namespace agg
         enum pix_width_e { pix_width = pixfmt_type::pix_width };
 
         image_accessor_clip() {}
-        explicit image_accessor_clip(const pixfmt_type& pixf,
-                                     const color_type& bk) :
+        explicit image_accessor_clip(pixfmt_type& pixf, 
+                                     const color_type& bk) : 
             m_pixf(&pixf)
         {
             pixfmt_type::make_pix(m_bk_buf, bk);
         }
 
-        void attach(const pixfmt_type& pixf)
+        void attach(pixfmt_type& pixf)
         {
             m_pixf = &pixf;
         }
@@ -85,7 +85,7 @@ namespace agg
         {
             ++m_y;
             m_x = m_x0;
-            if(m_pix_ptr &&
+            if(m_pix_ptr && 
                m_y >= 0 && m_y < (int)m_pixf->height())
             {
                 return m_pix_ptr = m_pixf->pix_ptr(m_x, m_y);
@@ -96,7 +96,7 @@ namespace agg
 
     private:
         const pixfmt_type* m_pixf;
-        int8u              m_bk_buf[4];
+        int8u              m_bk_buf[pix_width];
         int                m_x, m_x0, m_y;
         const int8u*       m_pix_ptr;
     };
@@ -115,11 +115,11 @@ namespace agg
         enum pix_width_e { pix_width = pixfmt_type::pix_width };
 
         image_accessor_no_clip() {}
-        explicit image_accessor_no_clip(const pixfmt_type& pixf) :
-            m_pixf(&pixf)
+        explicit image_accessor_no_clip(pixfmt_type& pixf) : 
+            m_pixf(&pixf) 
         {}
 
-        void attach(const pixfmt_type& pixf)
+        void attach(pixfmt_type& pixf)
         {
             m_pixf = &pixf;
         }
@@ -162,11 +162,11 @@ namespace agg
         enum pix_width_e { pix_width = pixfmt_type::pix_width };
 
         image_accessor_clone() {}
-        explicit image_accessor_clone(const pixfmt_type& pixf) :
-            m_pixf(&pixf)
+        explicit image_accessor_clone(pixfmt_type& pixf) : 
+            m_pixf(&pixf) 
         {}
 
-        void attach(const pixfmt_type& pixf)
+        void attach(pixfmt_type& pixf)
         {
             m_pixf = &pixf;
         }
@@ -189,7 +189,7 @@ namespace agg
             m_x = m_x0 = x;
             m_y = y;
             if(y >= 0 && y < (int)m_pixf->height() &&
-               x >= 0 && x+(int)len <= (int)m_pixf->width())
+               x >= 0 && x+len <= (int)m_pixf->width())
             {
                 return m_pix_ptr = m_pixf->pix_ptr(x, y);
             }
@@ -208,7 +208,7 @@ namespace agg
         {
             ++m_y;
             m_x = m_x0;
-            if(m_pix_ptr &&
+            if(m_pix_ptr && 
                m_y >= 0 && m_y < (int)m_pixf->height())
             {
                 return m_pix_ptr = m_pixf->pix_ptr(m_x, m_y);
@@ -238,13 +238,13 @@ namespace agg
         enum pix_width_e { pix_width = pixfmt_type::pix_width };
 
         image_accessor_wrap() {}
-        explicit image_accessor_wrap(const pixfmt_type& pixf) :
-            m_pixf(&pixf),
-            m_wrap_x(pixf.width()),
+        explicit image_accessor_wrap(pixfmt_type& pixf) : 
+            m_pixf(&pixf), 
+            m_wrap_x(pixf.width()), 
             m_wrap_y(pixf.height())
         {}
 
-        void attach(const pixfmt_type& pixf)
+        void attach(pixfmt_type& pixf)
         {
             m_pixf = &pixf;
         }
@@ -252,7 +252,7 @@ namespace agg
         AGG_INLINE const int8u* span(int x, int y, unsigned)
         {
             m_x = x;
-            m_row_ptr = m_pixf->row_ptr(m_wrap_y(y));
+            m_row_ptr = m_pixf->pix_ptr(0, m_wrap_y(y));
             return m_row_ptr + m_wrap_x(x) * pix_width;
         }
 
@@ -264,7 +264,7 @@ namespace agg
 
         AGG_INLINE const int8u* next_y()
         {
-            m_row_ptr = m_pixf->row_ptr(++m_wrap_y);
+            m_row_ptr = m_pixf->pix_ptr(0, ++m_wrap_y);
             return m_row_ptr + m_wrap_x(m_x) * pix_width;
         }
 
@@ -284,15 +284,15 @@ namespace agg
     {
     public:
         wrap_mode_repeat() {}
-        wrap_mode_repeat(unsigned size) :
-            m_size(size),
+        wrap_mode_repeat(unsigned size) : 
+            m_size(size), 
             m_add(size * (0x3FFFFFFF / size)),
             m_value(0)
         {}
 
         AGG_INLINE unsigned operator() (int v)
-        {
-            return m_value = (unsigned(v) + m_add) % m_size;
+        { 
+            return m_value = (unsigned(v) + m_add) % m_size; 
         }
 
         AGG_INLINE unsigned operator++ ()
@@ -320,7 +320,7 @@ namespace agg
             m_mask >>= 1;
         }
         AGG_INLINE unsigned operator() (int v)
-        {
+        { 
             return m_value = unsigned(v) & m_mask;
         }
         AGG_INLINE unsigned operator++ ()
@@ -347,8 +347,8 @@ namespace agg
             m_value(0)
         {}
 
-        AGG_INLINE unsigned operator() (int v)
-        {
+        AGG_INLINE unsigned operator() (int v) 
+        { 
             if(m_mask) return m_value = unsigned(v) & m_mask;
             return m_value = (unsigned(v) + m_add) % m_size;
         }
@@ -372,15 +372,15 @@ namespace agg
     {
     public:
         wrap_mode_reflect() {}
-        wrap_mode_reflect(unsigned size) :
-            m_size(size),
+        wrap_mode_reflect(unsigned size) : 
+            m_size(size), 
             m_size2(size * 2),
             m_add(m_size2 * (0x3FFFFFFF / m_size2)),
             m_value(0)
         {}
 
         AGG_INLINE unsigned operator() (int v)
-        {
+        { 
             m_value = (unsigned(v) + m_add) % m_size2;
             if(m_value >= m_size) return m_size2 - m_value - 1;
             return m_value;
@@ -411,14 +411,14 @@ namespace agg
         {
             m_mask = 1;
             m_size = 1;
-            while(m_mask < size)
+            while(m_mask < size) 
             {
                 m_mask = (m_mask << 1) | 1;
                 m_size <<= 1;
             }
         }
         AGG_INLINE unsigned operator() (int v)
-        {
+        { 
             m_value = unsigned(v) & m_mask;
             if(m_value >= m_size) return m_mask - m_value;
             return m_value;
@@ -451,12 +451,12 @@ namespace agg
             m_value(0)
         {}
 
-        AGG_INLINE unsigned operator() (int v)
-        {
-            m_value = m_mask ? unsigned(v) & m_mask :
+        AGG_INLINE unsigned operator() (int v) 
+        { 
+            m_value = m_mask ? unsigned(v) & m_mask : 
                               (unsigned(v) + m_add) % m_size2;
             if(m_value >= m_size) return m_size2 - m_value - 1;
-            return m_value;
+            return m_value;            
         }
         AGG_INLINE unsigned operator++ ()
         {

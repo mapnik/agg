@@ -31,9 +31,8 @@ namespace agg
     public:
         conv_transform(VertexSource& source, Transformer& tr) :
             m_source(&source), m_trans(&tr) {}
-    
         void attach(VertexSource& source) { m_source = &source; }
-    
+
         void rewind(unsigned path_id) 
         { 
             m_source->rewind(path_id); 
@@ -54,15 +53,13 @@ namespace agg
             m_trans = &tr;
         }
 
-        unsigned type() const { return m_source->type(); }
-
     private:
         conv_transform(const conv_transform<VertexSource>&);
         const conv_transform<VertexSource>& 
             operator = (const conv_transform<VertexSource>&);
 
         VertexSource*      m_source;
-        const Transformer* m_trans;
+        Transformer* m_trans;
     };
 
 

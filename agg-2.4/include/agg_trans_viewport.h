@@ -22,6 +22,7 @@
 #define AGG_TRANS_VIEWPORT_INCLUDED
 
 #include <cstring>
+#include <cmath>
 #include "agg_trans_affine.h"
 
 
@@ -202,12 +203,12 @@ namespace agg
 
         void serialize(int8u* ptr) const
         {
-            memcpy(ptr, this, sizeof(*this)); 
+            std::memcpy(ptr, this, sizeof(*this)); 
         }
 
         void deserialize(const int8u* ptr)
         {
-            memcpy(this,  ptr, sizeof(*this));
+            std::memcpy(this,  ptr, sizeof(*this));
         }
 
     private:

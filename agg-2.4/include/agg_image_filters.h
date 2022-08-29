@@ -50,6 +50,7 @@ namespace agg
         template<class FilterF> void calculate(const FilterF& filter,
                                                bool normalization=true)
         {
+			filter; // prevent erroneous C4100 in MSVC
             double r = filter.radius();
             realloc_lut(r);
             unsigned i;
@@ -199,7 +200,7 @@ namespace agg
         static double radius() { return 1.0; }
         double calc_weight(double x) const
         {
-            return bessel_i0(a * sqrt(1. - x * x)) * i0a;
+            return bessel_i0(a * std::sqrt(1. - x * x)) * i0a;
         }
 
     private:
@@ -300,7 +301,7 @@ namespace agg
         static double radius() { return 2.0; }
         static double calc_weight(double x) 
         {
-            return exp(-2.0 * x * x) * sqrt(2.0 / pi);
+            return std::exp(-2.0 * x * x) * std::sqrt(2.0 / pi);
         }
     };
 
@@ -364,7 +365,7 @@ namespace agg
            if(x > m_radius) return 0.0;
            x *= pi;
            double xr = x / m_radius;
-           return (std::sin(x) / x) * (0.42 + 0.5 * std::cos(xr) + 0.08 * std::cos(2*xr));
+           return (std::sin(x) / x) * (0.42 + 0.5*std::cos(xr) + 0.08*std::cos(2*xr));
         }
     private:
         double m_radius;
