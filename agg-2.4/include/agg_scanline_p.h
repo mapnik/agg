@@ -27,7 +27,6 @@
 #ifndef AGG_SCANLINE_P_INCLUDED
 #define AGG_SCANLINE_P_INCLUDED
 
-#include <cstring>
 #include "agg_array.h"
 
 namespace agg
@@ -104,7 +103,7 @@ namespace agg
         //--------------------------------------------------------------------
         void add_cells(int x, unsigned len, const cover_type* covers)
         {
-            std::memcpy(m_cover_ptr, covers, len * sizeof(cover_type));
+            memcpy(m_cover_ptr, covers, len * sizeof(cover_type));
             if(x == m_last_x+1 && m_cur_span->len > 0)
             {
                 m_cur_span->len += (int16)len;
@@ -260,7 +259,7 @@ namespace agg
         //--------------------------------------------------------------------
         void add_cells(int x, unsigned len, const cover_type* covers)
         {
-            std::memcpy(m_cover_ptr, covers, len * sizeof(cover_type));
+            memcpy(m_cover_ptr, covers, len * sizeof(cover_type));
             if(x == m_last_x+1 && m_spans.size() && m_spans.last().len > 0)
             {
                 m_spans.last().len += coord_type(len);
@@ -327,4 +326,3 @@ namespace agg
 
 
 #endif
-

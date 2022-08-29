@@ -20,7 +20,6 @@
 #ifndef AGG_RENDERING_BUFFER_DYNAROW_INCLUDED
 #define AGG_RENDERING_BUFFER_DYNAROW_INCLUDED
 
-#include <cstring>
 #include "agg_array.h"
 
 namespace agg
@@ -62,7 +61,7 @@ namespace agg
             m_height(height),
             m_byte_width(byte_width)
         {
-            std::memset(&m_rows[0], 0, sizeof(row_data) * height);
+            memset(&m_rows[0], 0, sizeof(row_data) * height);
         }
 
         // Allocate and clear the buffer
@@ -80,7 +79,7 @@ namespace agg
                 m_height = height;
                 m_byte_width = byte_width;
                 m_rows.resize(height);
-                std::memset(&m_rows[0], 0, sizeof(row_data) * height);
+                memset(&m_rows[0], 0, sizeof(row_data) * height);
             }
         }
 
@@ -107,7 +106,7 @@ namespace agg
                 r->ptr = p;
                 r->x1  = x;
                 r->x2  = x2;
-                std::memset(p, 0, m_byte_width);
+                memset(p, 0, m_byte_width);
             }
             return (int8u*)r->ptr;
         }

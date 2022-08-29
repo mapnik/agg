@@ -122,7 +122,7 @@ namespace agg
             unsigned i;
             for(i = 0; i < m_storage.size(); i++)
             {
-                std::memcpy(ptr, &m_storage[i], sizeof(vertex_integer_type));
+                memcpy(ptr, &m_storage[i], sizeof(vertex_integer_type));
                 ptr += sizeof(vertex_integer_type);
             }
         }
@@ -264,7 +264,7 @@ namespace agg
             }
 
             vertex_integer_type v;
-            std::memcpy(&v, m_ptr, sizeof(vertex_integer_type));
+            memcpy(&v, m_ptr, sizeof(vertex_integer_type));
             unsigned cmd = v.vertex(x, y, m_dx, m_dy, m_scale);
             if(is_move_to(cmd) && m_vertices > 2)
             {
@@ -292,4 +292,3 @@ namespace agg
 
 
 #endif
-

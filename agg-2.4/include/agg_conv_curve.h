@@ -62,6 +62,9 @@ namespace agg
 
         explicit conv_curve(VertexSource& source) :
           m_source(&source), m_last_x(0.0), m_last_y(0.0) {}
+
+        conv_curve(self_type &&) = default;
+
         void attach(VertexSource& source) { m_source = &source; }
 
         void approximation_method(curve_approximation_method_e v) 
@@ -154,10 +157,10 @@ namespace agg
             return path_cmd_line_to;
         }
 
-        double ct2_x = 0;
-        double ct2_y = 0;
-        double end_x = 0;
-        double end_y = 0;
+        double ct2_x=0;
+        double ct2_y=0;
+        double end_x=0;
+        double end_y=0;
 
         unsigned cmd = m_source->vertex(x, y);
         switch(cmd)

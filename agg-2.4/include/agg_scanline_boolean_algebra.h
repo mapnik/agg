@@ -17,6 +17,7 @@
 #define AGG_SCANLINE_BOOLEAN_ALGEBRA_INCLUDED
 
 #include <cstdlib>
+#include <cmath>
 #include "agg_basics.h"
 
 
@@ -1391,7 +1392,7 @@ namespace agg
     // Apply eXclusive OR to two anti-aliased scanline shapes. 
     // There's the absolute difference used to calculate 
     // Anti-Aliasing values, that is:
-    // a XOR b : abs(a-b)
+    // a XOR b : std::abs(a-b)
     // See intersect_shapes_aa for more comments
     //----------
     template<class ScanlineGen1, 
@@ -1563,4 +1564,3 @@ namespace agg
 
 
 #endif
-

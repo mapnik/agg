@@ -20,7 +20,6 @@
 #ifndef AGG_RENDERING_BUFFER_INCLUDED
 #define AGG_RENDERING_BUFFER_INCLUDED
 
-#include <cstring>
 #include "agg_array.h"
 
 namespace agg
@@ -63,7 +62,7 @@ namespace agg
             m_stride = stride;
             if(stride < 0) 
             { 
-                m_start = m_buf - (AGG_INT64)(height - 1) * stride;
+                m_start = m_buf - int(height - 1) * stride;
             }
         }
 
@@ -81,10 +80,10 @@ namespace agg
         //--------------------------------------------------------------------
         AGG_INLINE       T* row_ptr(int, int y, unsigned) 
         { 
-            return m_start + y * (AGG_INT64)m_stride; 
+            return m_start + y * m_stride; 
         }
-        AGG_INLINE       T* row_ptr(int y)       { return m_start + y * (AGG_INT64)m_stride; }
-        AGG_INLINE const T* row_ptr(int y) const { return m_start + y * (AGG_INT64)m_stride; }
+        AGG_INLINE       T* row_ptr(int y)       { return m_start + y * m_stride; }
+        AGG_INLINE const T* row_ptr(int y) const { return m_start + y * m_stride; }
         AGG_INLINE row_data row    (int y) const 
         { 
             return row_data(0, m_width-1, row_ptr(y)); 
@@ -106,7 +105,7 @@ namespace agg
             unsigned w = width();
             for (y = 0; y < h; y++)
             {
-                std::memcpy(row_ptr(0, y, w), src.row_ptr(y), l);
+                memcpy(row_ptr(0, y, w), src.row_ptr(y), l);
             }
         }
 
@@ -129,7 +128,7 @@ namespace agg
 
     private:
         //--------------------------------------------------------------------
-        T*            m_buf;    // Pointer to renrdering buffer
+        T*            m_buf;    // Pointer to rendering buffer
         T*            m_start;  // Pointer to first pixel depending on stride 
         unsigned      m_width;  // Width in pixels
         unsigned      m_height; // Height in pixels
@@ -177,20 +176,25 @@ namespace agg
             {
                 m_rows.resize(height);
             }
+            else if(height == 0)
+            {
+                return;
+            }
 
             T* row_ptr = m_buf;
 
             if(stride < 0)
             {
-                row_ptr = m_buf - (AGG_INT64)(height - 1) * stride;
+                row_ptr = m_buf - int(height - 1) * stride;
             }
 
             T** rows = &m_rows[0];
 
-            while(height--)
+            while(height > 0)
             {
                 *rows++ = row_ptr;
                 row_ptr += stride;
+                --height;
             }
         }
 
@@ -236,7 +240,7 @@ namespace agg
             unsigned w = width();
             for (y = 0; y < h; y++)
             {
-                std::memcpy(row_ptr(0, y, w), src.row_ptr(y), l);
+                memcpy(row_ptr(0, y, w), src.row_ptr(y), l);
             }
         }
 
@@ -259,7 +263,7 @@ namespace agg
 
     private:
         //--------------------------------------------------------------------
-        T*            m_buf;        // Pointer to renrdering buffer
+        T*            m_buf;        // Pointer to rendering buffer
         pod_array<T*> m_rows;       // Pointers to each row of the buffer
         unsigned      m_width;      // Width in pixels
         unsigned      m_height;     // Height in pixels
@@ -291,8 +295,8 @@ namespace agg
 #ifdef AGG_RENDERING_BUFFER
     typedef AGG_RENDERING_BUFFER rendering_buffer;
 #else
-//  typedef row_ptr_cache<int8u> rendering_buffer;
-    typedef row_accessor<int8u> rendering_buffer;
+    typedef row_ptr_cache<int8u> rendering_buffer;
+    //typedef row_accessor<int8u> rendering_buffer;
 #endif
 
 }

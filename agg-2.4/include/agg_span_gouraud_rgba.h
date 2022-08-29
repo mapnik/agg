@@ -24,7 +24,6 @@
 #ifndef AGG_SPAN_GOURAUD_RGBA_INCLUDED
 #define AGG_SPAN_GOURAUD_RGBA_INCLUDED
 
-#include <cstdlib>
 #include "agg_basics.h"
 #include "agg_color_rgba.h"
 #include "agg_dda_line.h"
@@ -199,10 +198,10 @@ namespace agg
                 vg = g.y();
                 vb = b.y();
                 va = a.y();
-                if(vr < 0) { vr = 0; } if(vr > lim) { vr = lim; }
-                if(vg < 0) { vg = 0; } if(vg > lim) { vg = lim; }
-                if(vb < 0) { vb = 0; } if(vb > lim) { vb = lim; }
-                if(va < 0) { va = 0; } if(va > lim) { va = lim; }
+                if(vr < 0) vr = 0; if(vr > lim) vr = lim;
+                if(vg < 0) vg = 0; if(vg > lim) vg = lim;
+                if(vb < 0) vb = 0; if(vb > lim) vb = lim;
+                if(va < 0) va = 0; if(va > lim) va = lim;
                 span->r = (value_type)vr;
                 span->g = (value_type)vg;
                 span->b = (value_type)vb;
@@ -246,10 +245,10 @@ namespace agg
                 vg = g.y();
                 vb = b.y();
                 va = a.y();
-                if(vr < 0) { vr = 0; } if(vr > lim) { vr = lim; }
-                if(vg < 0) { vg = 0; } if(vg > lim) { vg = lim; }
-                if(vb < 0) { vb = 0; } if(vb > lim) { vb = lim; }
-                if(va < 0) { va = 0; } if(va > lim) { va = lim; }
+                if(vr < 0) vr = 0; if(vr > lim) vr = lim;
+                if(vg < 0) vg = 0; if(vg > lim) vg = lim;
+                if(vb < 0) vb = 0; if(vb > lim) vb = lim;
+                if(va < 0) va = 0; if(va > lim) va = lim;
                 span->r = (value_type)vr;
                 span->g = (value_type)vg;
                 span->b = (value_type)vb;
