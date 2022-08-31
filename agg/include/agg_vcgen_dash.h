@@ -21,7 +21,7 @@
 
 #include "agg_basics.h"
 #include "agg_vertex_sequence.h"
-#include <mapnik/config.hpp>
+#include "agg_export.h"
 
 namespace agg
 {
@@ -30,7 +30,7 @@ namespace agg
     //
     // See Implementation agg_vcgen_dash.cpp
     //
-    class MAPNIK_DECL vcgen_dash
+    class AGG_EXPORT vcgen_dash
     {
         enum max_dashes_e
         {

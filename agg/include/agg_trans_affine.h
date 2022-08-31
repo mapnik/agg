@@ -21,8 +21,7 @@
 
 #include <cmath>
 #include "agg_basics.h"
-#include <mapnik/config.hpp>
-
+#include "agg_export.h"
 namespace agg
 {
     const double affine_epsilon = 1e-14;
@@ -85,7 +84,7 @@ namespace agg
     // m *= agg::trans_affine_rotation(30.0 * 3.1415926 / 180.0);  // rotate
     // m *= agg::trans_affine_translation(100.0, 100.0);           // move back to (100,100)
     //----------------------------------------------------------------------
-    struct MAPNIK_DECL trans_affine
+    struct AGG_EXPORT trans_affine
     {
         static const trans_affine identity;
         double sx, shy, shx, sy, tx, ty;

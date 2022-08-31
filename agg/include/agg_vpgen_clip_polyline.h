@@ -17,9 +17,7 @@
 #define AGG_VPGEN_CLIP_POLYLINE_INCLUDED
 
 #include "agg_basics.h"
-
-// https://github.com/mapnik/mapnik/issues/1860
-#include <mapnik/config.hpp>
+#include "agg_export.h"
 
 namespace agg
 {
@@ -28,7 +26,7 @@ namespace agg
     //
     // See Implementation agg_vpgen_clip_polyline.cpp
     //
-    class MAPNIK_DECL vpgen_clip_polyline
+    class AGG_EXPORT vpgen_clip_polyline
     {
     public:
         vpgen_clip_polyline() : 

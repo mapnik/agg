@@ -18,8 +18,7 @@
 #define AGG_CURVES_INCLUDED
 
 #include "agg_array.h"
-
-#include <mapnik/config.hpp>
+#include "agg_export.h"
 
 namespace agg
 {
@@ -34,7 +33,7 @@ namespace agg
     };
     
     //--------------------------------------------------------------curve3_inc
-    class MAPNIK_DECL curve3_inc
+    class AGG_EXPORT curve3_inc
     {
     public:
         curve3_inc() :
@@ -93,7 +92,7 @@ namespace agg
 
 
     //-------------------------------------------------------------curve3_div
-    class MAPNIK_DECL curve3_div
+    class AGG_EXPORT curve3_div
     {
     public:
         curve3_div() : 
@@ -166,7 +165,7 @@ namespace agg
 
 
     //-------------------------------------------------------------curve4_points
-    struct MAPNIK_DECL curve4_points
+    struct AGG_EXPORT curve4_points
     {
         double cp[8];
         curve4_points() {}
@@ -193,7 +192,7 @@ namespace agg
 
 
     //-------------------------------------------------------------curve4_inc
-    class MAPNIK_DECL curve4_inc
+    class AGG_EXPORT curve4_inc
     {
     public:
         curve4_inc() :
@@ -373,7 +372,7 @@ namespace agg
 
 
     //-------------------------------------------------------------curve4_div
-    class MAPNIK_DECL curve4_div
+    class AGG_EXPORT curve4_div
     {
     public:
         curve4_div() : 
@@ -473,7 +472,7 @@ namespace agg
 
 
     //-----------------------------------------------------------------curve3
-    class MAPNIK_DECL curve3
+    class AGG_EXPORT curve3
     {
     public:
         curve3() : m_approximation_method(curve_div) {}
@@ -578,7 +577,7 @@ namespace agg
 
 
     //-----------------------------------------------------------------curve4
-    class MAPNIK_DECL curve4
+    class AGG_EXPORT curve4
     {
     public:
         curve4() : m_approximation_method(curve_div) {}
