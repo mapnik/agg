@@ -18,7 +18,7 @@
 
 #include "agg_basics.h"
 #include "agg_vertex_sequence.h"
-
+#include <utility>
 
 namespace agg
 {

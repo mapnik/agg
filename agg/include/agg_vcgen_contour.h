@@ -17,7 +17,7 @@
 #define AGG_VCGEN_CONTOUR_INCLUDED
 
 #include "agg_math_stroke.h"
-#include <mapnik/config.hpp>
+#include "agg_export.h"
 
 namespace agg
 {
@@ -26,7 +26,7 @@ namespace agg
     //
     // See Implementation agg_vcgen_contour.cpp
     //
-    class MAPNIK_DECL vcgen_contour
+    class AGG_EXPORT vcgen_contour
     {
         enum status_e
         {

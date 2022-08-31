@@ -23,7 +23,7 @@ namespace agg
 {
 
     //------------------------------------------------------------------------
-    vcgen_smooth_poly1::vcgen_smooth_poly1() :
+    template<> vcgen_smooth_poly1::vcgen_smooth() :
         m_src_vertices(),
         m_smooth_value(0.5),
         m_closed(0),
@@ -34,7 +34,7 @@ namespace agg
 
 
     //------------------------------------------------------------------------
-    void vcgen_smooth_poly1::remove_all()
+    void template<> vcgen_smooth_poly1::remove_all()
     {
         m_src_vertices.remove_all();
         m_closed = 0;
@@ -222,4 +222,3 @@ namespace agg
     }
 
 }
-
